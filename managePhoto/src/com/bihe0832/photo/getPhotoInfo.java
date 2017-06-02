@@ -158,11 +158,11 @@ public class getPhotoInfo {
 		System.out.println(	
 				"******************************************************\n"+  
 				"照片整理结果如下：共计从: "+ sourceFolder + " 整理了 "+ (succRename + succSame + succNoInfo + failNotFound + failException) +" 张照片到 "+ targetFolder +"，其中：\n"+  
-				"整理成功: "+ (succRename + succSame) + " 张，其中\n"+  
+				"整理成功: "+ (succRename + succSame + succNoInfo) + " 张，其中\n"+  
 				"\t: "+ succSame  + " 张照片为已经存在的照片\n"+  
 				"\t: "+ succRename  + " 张照片已经按时间重新命名\n"+  
 				"\t: "+ succNoInfo + " 张照片保留原名称，原目录没有删除，需要手动整理\n"+  
-				"整理失败: "+ (failNotFound + failException + succNoInfo) + " 张，其中\n"+  
+				"整理失败: "+ (failNotFound + failException) + " 张，其中\n"+  
 				"\t: "+ failNotFound + " 张照片没有找到\n"+  
 				"\t: "+ failException + " 张照片解析时间错误放弃整理，需要手动整理\n"+  
 				"******************************************************\n"
