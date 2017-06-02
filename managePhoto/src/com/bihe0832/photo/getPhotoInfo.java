@@ -36,7 +36,7 @@ public class getPhotoInfo {
 	private static final int RESULT_SUCC_SAME = 2;
 	
 	
-	private static final ArrayList<String> IMG_PREFIX_LIST = new ArrayList<String>(Arrays.asList("jpg","jpeg","png"));
+	private static final ArrayList<String> IMG_PREFIX_LIST = new ArrayList<String>(Arrays.asList("jpg","jpeg","png","bmp"));
 
 	public static void main(String[] params) throws Exception {
         if ((params.length == 0)) {
