@@ -31,9 +31,9 @@ public class getPhotoInfo {
 	
 	private static final int RESULT_FAIL_NOT_FOUND = -1;
 	private static final int RESULT_FAIL_COPY_EXCEPTION = -2;
+	private static final int RESULT_FAIL_NOINFO = -3;
 	private static final int RESULT_SUCC_RENAME = 1;
-	private static final int RESULT_SUCC_NOINFO = 2;
-	private static final int RESULT_SUCC_SAME = 3;
+	private static final int RESULT_SUCC_SAME = 2;
 	
 	
 	private static final ArrayList<String> IMG_PREFIX_LIST = new ArrayList<String>(Arrays.asList("jpg","jpeg","png"));
@@ -98,8 +98,22 @@ public class getPhotoInfo {
 	}
 
 	private static void copyPhoto(String sourceFolder,String targetFolder){
+		if(null != sourceFolder && sourceFolder.length() > 0){
+			sourceFolder = sourceFolder + "/";
+		}else{
+			System.out.println("要整理的照片文件夹：" + sourceFolder + " 不存在"); 
+			return;
+		}
+		
+		if(null != targetFolder && targetFolder.length() > 0){
+			targetFolder = targetFolder + "/";
+		}else{
+			System.out.println("整理后保存照片的文件夹：" + targetFolder + " 不存在"); 
+			return;
+		}
+		
 		int succRename = 0;
-		int succNoInfo = 0;
+		int failNoInfo = 0;
 		int succSame = 0;
 		int failNotFound = 0;
 		int failException = 0;
@@ -107,16 +121,12 @@ public class getPhotoInfo {
 				"\n\n******************************************************\n"+  
 					"照片整理已经开始……\n"+ 
 					"\t如果照片较多，持续时间较长，请耐心等待。\n"+ 
-					"\t整理过程中您可以在目标目录实时查看整理效果\n\n");
+					"\t整理过程中您可以在目标目录实时查看整理效果");
 		File[] listFiles = new File(sourceFolder).listFiles();
 	    for(File f: listFiles){
 	        if(f.isFile() ){
 	        	if(IMG_PREFIX_LIST.contains(f.getAbsolutePath().substring(f.getAbsolutePath().lastIndexOf(".") + 1).toLowerCase())){
 	        		switch(copyPhotoOnce(f.getAbsolutePath(),targetFolder)){
-		    			case RESULT_SUCC_NOINFO:
-		    				succNoInfo++;
-		    				f.delete();
-		    				break;
 		    			case RESULT_SUCC_RENAME:
 		    				succRename++;
 		    				f.delete();
@@ -131,9 +141,12 @@ public class getPhotoInfo {
 		    			case RESULT_FAIL_COPY_EXCEPTION:
 		    				failException++;
 		    				break;
+		    			case RESULT_FAIL_NOINFO:
+		    				failNoInfo++;
+		    				break;
 	        		}
-	        		if((succRename + succNoInfo + succSame + failNotFound + failException)%5 == 0){
-	        			System.out.println("正在努力整理中，已完成: "+ sourceFolder + "目录下 "+ (succRename + succNoInfo + succSame + failNotFound + failException) +" 张照片\n");  
+	        		if((succRename + succSame + failNoInfo + failNotFound + failException)%5 == 0){
+	        			System.out.println("\n正在努力整理中，已完成: "+ sourceFolder + "目录下 "+ (succRename + failNoInfo + succSame + failNotFound + failException) +" 张照片\n");  
 	        		}
 	        	}
 	        }else if(f.isDirectory()){
@@ -142,15 +155,15 @@ public class getPhotoInfo {
 	    }
 	   
 		System.out.println(	
-				"\n\n******************************************************\n"+  
-				"照片整理结果如下：共计从: "+ sourceFolder + "整理了 "+ (succRename + succNoInfo + succSame + failNotFound + failException) +" 张照片，其中：\n"+  
-				"整理成功: "+ (succRename + succNoInfo + succSame) + " 张\n"+  
-				"\t: "+ succSame  + " 张为已经存在的照片\n"+  
-				"\t: "+ succRename  + " 张已经按时间重新命名\n"+  
-				"\t: "+ succNoInfo + " 张保留了原名称\n"+  
-				"整理失败: "+ (failNotFound + failException) + " 张\n"+  
+				"******************************************************\n"+  
+				"照片整理结果如下：共计从: "+ sourceFolder + " 整理了 "+ (succRename + succSame + failNoInfo + failNotFound + failException) +" 张照片到 "+ targetFolder +"，其中：\n"+  
+				"整理成功: "+ (succRename + succSame) + " 张，其中\n"+  
+				"\t: "+ succSame  + " 张照片为已经存在的照片\n"+  
+				"\t: "+ succRename  + " 张照片已经按时间重新命名\n"+  
+				"整理失败: "+ (failNotFound + failException + failNoInfo) + " 张，其中\n"+  
 				"\t: "+ failNotFound + " 张照片没有找到\n"+  
-				"\t: "+ failException + " 张照片解析时间错误，需要手动整理\n"+  
+				"\t: "+ failException + " 张照片解析时间错误放弃整理，需要手动整理\n"+  
+				"\t: "+ failNoInfo + " 张照片因为无法重命名放弃整理，需要手动整理\n"+  
 				"******************************************************\n"
 			); 
 	}
@@ -168,27 +181,28 @@ public class getPhotoInfo {
 				if(photoInfo.getDateTimeOriginal().length() > 0){
 					targetBasePath = targetFolder + photoInfo.getDateTimeOriginal();
 					result = RESULT_SUCC_RENAME;
+					targetBasePath = targetBasePath.replace(":","-").replace(" ","_");
+					String targetPath = targetBasePath;
+					do{
+						targetPath = targetPath + "."+ prefix;
+						targetImg = new File(targetPath);
+						if(targetImg.exists()){
+							String targetImgMd5= getFileMD5(targetImg);
+							String sourceImgMd5= getFileMD5(sourceImg);
+							if(targetImgMd5.equalsIgnoreCase(sourceImgMd5)){
+								targetImg.delete();
+								result = RESULT_SUCC_SAME;
+							}
+						}
+						imgNum++;
+						targetPath = targetBasePath +"-[" + imgNum+ "]";
+					}while(targetImg.exists());
+					Files.copy(sourceImg.toPath(),targetImg.toPath());
 				}else{
 					targetBasePath = targetFolder + sourceImg.getName().substring(0,sourceImg.getName().lastIndexOf("."));
-					result = RESULT_SUCC_NOINFO;
+					result = RESULT_FAIL_NOINFO;
 				}
-				targetBasePath = targetBasePath.replace(":","-").replace(" ","_");
-				String targetPath = targetBasePath;
-				do{
-					targetPath = targetPath + "."+ prefix;
-					targetImg = new File(targetPath);
-					if(targetImg.exists()){
-						String targetImgMd5= getFileMD5(targetImg);
-						String sourceImgMd5= getFileMD5(sourceImg);
-						if(targetImgMd5.equalsIgnoreCase(sourceImgMd5)){
-							targetImg.delete();
-							result = RESULT_SUCC_SAME;
-						}
-					}
-					imgNum++;
-					targetPath = targetBasePath +"-[" + imgNum+ "]";
-				}while(targetImg.exists());
-				Files.copy(sourceImg.toPath(),targetImg.toPath());
+				
 			} catch (Exception e) {
 				System.out.println("照片：" + sourcePath + " 整理失败" );
 				e.printStackTrace();
