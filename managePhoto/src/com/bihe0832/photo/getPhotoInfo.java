@@ -50,9 +50,16 @@ public class getPhotoInfo {
     		System.out.println(getPhotoInfo.class.toString() + " version " + VERSION_NAME + " (" + VERSION_CODE + ")\n");
     		printUsage(VERSION_PAGE_GENERAL);
             return;
-        } else if (params[0].toLowerCase().startsWith("--show")) {
+        } else if (params[0].toLowerCase().startsWith("--detail")) {
         	if(params.length > 1){
-        		showPhotoInfo(params[1]);
+        		showPhotoInfo(params[1],true);
+        	}else{
+        		printUsage(HELP_PAGE_GENERAL);
+        	}
+            return;
+        }else if (params[0].toLowerCase().startsWith("--show")) {
+        	if(params.length > 1){
+        		showPhotoInfo(params[1],false);
         	}else{
         		printUsage(HELP_PAGE_GENERAL);
         	}
@@ -70,11 +77,11 @@ public class getPhotoInfo {
 		}
     } 
 	
-	private static void showPhotoInfo(String filepath){
+	private static void showPhotoInfo(String filepath, boolean showDetail){
 		File tempImg = new File(filepath);
 		if(tempImg.exists()){
 			try {
-				PhotoInfo photoInfo = getPhotoInfoByPath(filepath);
+				PhotoInfo photoInfo = getPhotoInfoByPath(filepath,showDetail);
 				System.out.println(
 						"照片信息如下：\n"+  
 						"******************************************************\n"+  
@@ -82,7 +89,7 @@ public class getPhotoInfo {
 						"照片的当前路径: "+ tempImg.getAbsolutePath() + "\n"+  
 						"照片的空间大小: "+ tempImg.length() / 1024 + " KB" + "\n"+  
 						"照片的像素大小: "+ photoInfo.getWidth() + " * " +  photoInfo.getHeight() + "\n"+  
-						"拍摄时当地时间: "+ photoInfo.getDateTimeOriginal() + "\n"+  
+						"拍摄时当地时间: "+ photoInfo.getDateTime() + "\n"+  
 						"拍摄时标准时间: "+ photoInfo.getDateTimeStamp() + "\n"+  
 						"拍摄时地点经纬: "+ photoInfo.getLongitude() + " ," +  photoInfo.getLatitude() + "\n"+  
 						"拍摄时地点海拔: "+ photoInfo.getAltitude() + "\n" +
@@ -177,10 +184,10 @@ public class getPhotoInfo {
 		int imgNum = 0;
 		if(sourceImg.exists()){
 			try {
-				PhotoInfo photoInfo = getPhotoInfoByPath(sourcePath);
+				PhotoInfo photoInfo = getPhotoInfoByPath(sourcePath,false);
 				String targetBasePath = "";
-				if(photoInfo.getDateTimeOriginal().length() > 0){
-					targetBasePath = targetFolder + photoInfo.getDateTimeOriginal();
+				if(photoInfo.getDateTime().length() > 0){
+					targetBasePath = targetFolder + photoInfo.getDateTime();
 					result = RESULT_SUCC_RENAME;
 				}else{
 					targetBasePath = targetFolder + sourceImg.getName().substring(0,sourceImg.getName().lastIndexOf("."));
@@ -200,7 +207,7 @@ public class getPhotoInfo {
 						}
 					}
 					imgNum++;
-					targetPath = targetBasePath +"-[" + imgNum+ "]";
+					targetPath = targetBasePath +"-(" + imgNum+ ")";
 				}while(targetImg.exists());
 				Files.copy(sourceImg.toPath(),targetImg.toPath());
 			} catch (Exception e) {
@@ -230,7 +237,7 @@ public class getPhotoInfo {
         }
     }
     
-    private static PhotoInfo getPhotoInfoByPath(String imgFile) {
+    private static PhotoInfo getPhotoInfoByPath(String imgFile, boolean showDetail) {
     	PhotoInfo photoInfo = new PhotoInfo();
         InputStream is = null;  
         try {  
@@ -250,7 +257,9 @@ public class getPhotoInfo {
                 	if(PhotoInfo.keyList.contains(tag.getTagName())){
                 		photoInfo.valueList.put(tag.getTagName(), tag.getDescription());
                 	}
-//                	System.out.println(tag.getTagName() +":" + tag.getDescription());
+                	if(showDetail){
+                		System.out.println(tag.getTagName() +":" + tag.getDescription());
+                	}
                 }  
             }  
         } catch (ImageProcessingException e) {  
