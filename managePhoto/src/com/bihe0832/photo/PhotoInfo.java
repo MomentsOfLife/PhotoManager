@@ -60,7 +60,7 @@ public class PhotoInfo {
 			SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 			ParsePosition pos = new ParsePosition(0);
 			Date strtodate = formatter.parse(timeStr, pos);
-			SimpleDateFormat formatterafter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			SimpleDateFormat formatterafter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
 			return formatterafter.format(strtodate);
 		}else{
 			return timeStr;

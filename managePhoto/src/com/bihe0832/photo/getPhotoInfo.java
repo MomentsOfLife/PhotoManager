@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -24,17 +25,19 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
 
 public class getPhotoInfo {
-	private static final int VERSION_CODE = 1;
-	private static final String VERSION_NAME = "1.0.0";
+	private static final int VERSION_CODE = 3;
+	private static final String VERSION_NAME = "1.1.0";
 	private static final String HELP_PAGE_GENERAL = "help.txt";
 	private static final String VERSION_PAGE_GENERAL = "help_version.txt";	
 	
 	private static final int RESULT_FAIL_NOT_FOUND = -1;
 	private static final int RESULT_FAIL_COPY_EXCEPTION = -2;
-	private static final int RESULT_SUCC_NOINFO = -3;
+	private static final int RESULT_FAIL_NOINFO = -3;
 	private static final int RESULT_SUCC_RENAME = 1;
 	private static final int RESULT_SUCC_SAME = 2;
 	
+	private static Path sLastPhotoSourcePath = null;
+	private static Path sLastPhotoTargetPath = null;
 	
 	private static final ArrayList<String> IMG_PREFIX_LIST = new ArrayList<String>(Arrays.asList("jpg","jpeg","png","bmp"));
 
@@ -120,10 +123,10 @@ public class getPhotoInfo {
 		}
 		
 		int succRename = 0;
-		int succNoInfo = 0;
 		int succSame = 0;
 		int failNotFound = 0;
 		int failException = 0;
+		int failNoInfo = 0;
 		System.out.println(	
 				"\n\n******************************************************\n"+  
 					"照片整理已经开始……\n"+ 
@@ -142,8 +145,8 @@ public class getPhotoInfo {
 		    				succSame++;
 		    				f.delete();
 		    				break;
-		    			case RESULT_SUCC_NOINFO:
-		    				succNoInfo++;
+		    			case RESULT_FAIL_NOINFO:
+		    				failNoInfo++;
 		    				break;
 		    			case RESULT_FAIL_NOT_FOUND:
 		    				failNotFound++;
@@ -153,8 +156,8 @@ public class getPhotoInfo {
 		    				break;
 	
 	        		}
-	        		if((succRename + succSame + succNoInfo + failNotFound + failException)%5 == 0){
-	        			System.out.println("\n正在努力整理中，已完成: "+ sourceFolder + "目录下 "+ (succRename + succNoInfo + succSame + failNotFound + failException) +" 张照片\n");  
+	        		if((succRename + succSame + failNoInfo + failNotFound + failException)%5 == 0){
+	        			System.out.println("\n正在努力整理中，已完成: "+ sourceFolder + "目录下 "+ (succRename + failNoInfo + succSame + failNotFound + failException) +" 张照片\n");  
 	        		}
 	        	}
 	        }else if(f.isDirectory()){
@@ -164,13 +167,13 @@ public class getPhotoInfo {
 	   
 		System.out.println(	
 				"******************************************************\n"+  
-				"照片整理结果如下：共计从: "+ sourceFolder + " 整理了 "+ (succRename + succSame + succNoInfo + failNotFound + failException) +" 张照片到 "+ targetFolder +"，其中：\n"+  
-				"整理成功: "+ (succRename + succSame + succNoInfo) + " 张，其中\n"+  
+				"照片整理结果如下：共计从: "+ sourceFolder + " 整理了 "+ (succRename + succSame + failNoInfo + failNotFound + failException) +" 张照片到 "+ targetFolder +"，其中：\n"+  
+				"整理成功: "+ (succRename + succSame + failNoInfo) + " 张，其中\n"+  
 				"\t: "+ succSame  + " 张照片为已经存在的照片\n"+  
 				"\t: "+ succRename  + " 张照片已经按时间重新命名\n"+  
-				"\t: "+ succNoInfo + " 张照片保留原名称，原目录没有删除，需要手动整理\n"+  
 				"整理失败: "+ (failNotFound + failException) + " 张，其中\n"+  
 				"\t: "+ failNotFound + " 张照片没有找到\n"+  
+				"\t: "+ failNoInfo + " 张照片解析时间错误放弃整理，需要手动整理\n"+  
 				"\t: "+ failException + " 张照片解析时间错误放弃整理，需要手动整理\n"+  
 				"******************************************************\n"
 			); 
@@ -185,31 +188,41 @@ public class getPhotoInfo {
 		if(sourceImg.exists()){
 			try {
 				PhotoInfo photoInfo = getPhotoInfoByPath(sourcePath,false);
-				String targetBasePath = "";
 				if(photoInfo.getDateTime().length() > 0){
-					targetBasePath = targetFolder + photoInfo.getDateTime();
+					String targetBasePath = targetFolder + photoInfo.getDateTime();
+					targetBasePath = targetBasePath.replace(":","-").replace(" ","_");
+					String targetPath = targetBasePath;
+					do{
+						targetPath = targetPath + "."+ prefix;
+						targetImg = new File(targetPath);
+						if(targetImg.exists()){
+							String targetImgMd5= getFileMD5(targetImg);
+							String sourceImgMd5= getFileMD5(sourceImg);
+							if(targetImgMd5.equalsIgnoreCase(sourceImgMd5)){
+								targetImg.delete();
+								result = RESULT_SUCC_SAME;
+							}
+						}
+						imgNum++;
+						targetPath = targetBasePath +"-(" + imgNum+ ")";
+					}while(targetImg.exists());
+					sLastPhotoTargetPath = targetImg.toPath();
+					sLastPhotoSourcePath = sourceImg.toPath();
+					Files.copy(sourceImg.toPath(),targetImg.toPath());
 					result = RESULT_SUCC_RENAME;
 				}else{
-					targetBasePath = targetFolder + sourceImg.getName().substring(0,sourceImg.getName().lastIndexOf("."));
-					result = RESULT_SUCC_NOINFO;
-				}
-				targetBasePath = targetBasePath.replace(":","-").replace(" ","_");
-				String targetPath = targetBasePath;
-				do{
-					targetPath = targetPath + "."+ prefix;
-					targetImg = new File(targetPath);
-					if(targetImg.exists()){
-						String targetImgMd5= getFileMD5(targetImg);
-						String sourceImgMd5= getFileMD5(sourceImg);
-						if(targetImgMd5.equalsIgnoreCase(sourceImgMd5)){
-							targetImg.delete();
-							result = RESULT_SUCC_SAME;
+					if(null != sLastPhotoTargetPath && sLastPhotoSourcePath.startsWith(sourcePath.substring(0,sourcePath.lastIndexOf("/")))){
+						String backImgPath =
+								sourcePath.substring(0,sourcePath.lastIndexOf("/")+1) +
+									sLastPhotoTargetPath.toString().substring(sLastPhotoTargetPath.toString().lastIndexOf("/")+1);
+						File tempImg = new File(backImgPath);
+						if(!tempImg.exists()){
+							Files.copy(sLastPhotoTargetPath,tempImg.toPath());
 						}
 					}
-					imgNum++;
-					targetPath = targetBasePath +"-(" + imgNum+ ")";
-				}while(targetImg.exists());
-				Files.copy(sourceImg.toPath(),targetImg.toPath());
+					result = RESULT_FAIL_NOINFO;
+				}
+				
 			} catch (Exception e) {
 				System.out.println("照片：" + sourcePath + " 整理失败" );
 				e.printStackTrace();
