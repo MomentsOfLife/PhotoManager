@@ -94,7 +94,7 @@ public class getPhotoInfo {
 						"照片的像素大小: "+ photoInfo.getWidth() + " * " +  photoInfo.getHeight() + "\n"+  
 						"拍摄时当地时间: "+ photoInfo.getDateTime() + "\n"+  
 						"拍摄时标准时间: "+ photoInfo.getDateTimeStamp() + "\n"+  
-						"拍摄时地点经纬: "+ photoInfo.getLongitude() + " ," +  photoInfo.getLatitude() + "\n"+  
+						"拍摄时地点经纬: "+ photoInfo.getLatitude() + "," +  photoInfo.getLongitude() + "\n"+  
 						"拍摄时地点海拔: "+ photoInfo.getAltitude() + "\n" +
 						"拍摄时使用设备: "+ photoInfo.getMake() + " (" +photoInfo.getModel() + ")\n"+
 						"******************************************************\n"
