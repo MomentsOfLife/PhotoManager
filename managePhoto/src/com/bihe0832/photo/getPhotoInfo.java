@@ -154,7 +154,6 @@ public class getPhotoInfo {
 		    			case RESULT_FAIL_COPY_EXCEPTION:
 		    				failException++;
 		    				break;
-	
 	        		}
 	        		if((succRename + succSame + failNoInfo + failNotFound + failException)%5 == 0){
 	        			System.out.println("\n正在努力整理中，已完成: "+ sourceFolder + "目录下 "+ (succRename + failNoInfo + succSame + failNotFound + failException) +" 张照片\n");  
@@ -213,7 +212,7 @@ public class getPhotoInfo {
 				}else{
 					if(null != sLastPhotoTargetPath && sLastPhotoSourcePath.startsWith(sourcePath.substring(0,sourcePath.lastIndexOf("/")))){
 						String backImgPath =
-								sourcePath.substring(0,sourcePath.lastIndexOf("/")+1) +
+								sourcePath.substring(0,sourcePath.lastIndexOf(".")) + "_" +
 									sLastPhotoTargetPath.toString().substring(sLastPhotoTargetPath.toString().lastIndexOf("/")+1);
 						File tempImg = new File(backImgPath);
 						if(!tempImg.exists()){
