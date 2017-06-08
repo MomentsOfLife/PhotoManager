@@ -212,8 +212,9 @@ public class getPhotoInfo {
 				}else{
 					if(null != sLastPhotoTargetPath && sLastPhotoSourcePath.startsWith(sourcePath.substring(0,sourcePath.lastIndexOf("/")))){
 						String backImgPath =
-								sourcePath.substring(0,sourcePath.lastIndexOf(".")) + "_" +
-									sLastPhotoTargetPath.toString().substring(sLastPhotoTargetPath.toString().lastIndexOf("/")+1);
+								sourcePath.substring(0,sourcePath.lastIndexOf("/")+1) +
+								sLastPhotoSourcePath.toString().substring(sLastPhotoSourcePath.toString().lastIndexOf("/"),sLastPhotoSourcePath.toString().lastIndexOf("."))+ "_" +
+								sLastPhotoTargetPath.toString().substring(sLastPhotoTargetPath.toString().lastIndexOf("/")+1);
 						File tempImg = new File(backImgPath);
 						if(!tempImg.exists()){
 							Files.copy(sLastPhotoTargetPath,tempImg.toPath());
