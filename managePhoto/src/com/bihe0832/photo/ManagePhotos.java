@@ -1,34 +1,19 @@
 package com.bihe0832.photo;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
 
-import com.drew.imaging.ImageMetadataReader;
-import com.drew.imaging.ImageProcessingException;
-import com.drew.metadata.Directory;
-import com.drew.metadata.Metadata;
-import com.drew.metadata.Tag;
-
-public class getPhotoInfo {
-	private static final int VERSION_CODE = 3;
-	private static final String VERSION_NAME = "1.1.0";
-	private static final String HELP_PAGE_GENERAL = "help.txt";
-	private static final String VERSION_PAGE_GENERAL = "help_version.txt";	
+public class ManagePhotos {
 	
 	private static final int RESULT_FAIL_NOT_FOUND = -1;
 	private static final int RESULT_FAIL_COPY_EXCEPTION = -2;
@@ -39,75 +24,18 @@ public class getPhotoInfo {
 	private static Path sLastPhotoSourcePath = null;
 	private static Path sLastPhotoTargetPath = null;
 	
-	private static final ArrayList<String> IMG_PREFIX_LIST = new ArrayList<String>(Arrays.asList("jpg","jpeg","png","bmp"));
+	private final static String EXT_JPEG = "jpeg";
+	private final static String EXT_JPG = "jpg";
+	private final static String EXT_PNG = "png";
+	private final static String EXT_TIFF = "tiff";
+	private final static String EXT_BMP  = "bmp";
+	private final static String EXT_GIF  = "gif";
+    
+	private static final ArrayList<String> IMG_PREFIX_LIST = new ArrayList<String>(
+			Arrays.asList(EXT_JPEG,EXT_JPG,EXT_PNG,EXT_TIFF,EXT_BMP,EXT_GIF));
 
-	public static void main(String[] params) throws Exception {
-        if ((params.length == 0)) {
-            printUsage(HELP_PAGE_GENERAL);
-            return;
-        }
-        if (params[0].toLowerCase().startsWith("--help")) {
-            printUsage(HELP_PAGE_GENERAL);
-            return;
-        } else if (params[0].toLowerCase().startsWith("--version")) {
-    		System.out.println(getPhotoInfo.class.toString() + " version " + VERSION_NAME + " (" + VERSION_CODE + ")\n");
-    		printUsage(VERSION_PAGE_GENERAL);
-            return;
-        } else if (params[0].toLowerCase().startsWith("--detail")) {
-        	if(params.length > 1){
-        		showPhotoInfo(params[1],true);
-        	}else{
-        		printUsage(HELP_PAGE_GENERAL);
-        	}
-            return;
-        }else if (params[0].toLowerCase().startsWith("--show")) {
-        	if(params.length > 1){
-        		showPhotoInfo(params[1],false);
-        	}else{
-        		printUsage(HELP_PAGE_GENERAL);
-        	}
-            return;
-        }else if (params[0].toLowerCase().startsWith("--manage")) {
-        	if(params.length > 2){
-        		copyPhoto(params[1],params[2]);
-        	}else{
-        		printUsage(HELP_PAGE_GENERAL);
-        	}
-            return;
-        } else{
-        	printUsage(HELP_PAGE_GENERAL);
-			return;
-		}
-    } 
 	
-	private static void showPhotoInfo(String filepath, boolean showDetail){
-		File tempImg = new File(filepath);
-		if(tempImg.exists()){
-			try {
-				PhotoInfo photoInfo = getPhotoInfoByPath(filepath,showDetail);
-				System.out.println(
-						"照片信息如下：\n"+  
-						"******************************************************\n"+  
-						"照片的当前名称: "+ tempImg.getName() + "\n"+  
-						"照片的当前路径: "+ tempImg.getAbsolutePath() + "\n"+  
-						"照片的空间大小: "+ tempImg.length() / 1024 + " KB" + "\n"+  
-						"照片的像素大小: "+ photoInfo.getWidth() + " * " +  photoInfo.getHeight() + "\n"+  
-						"拍摄时当地时间: "+ photoInfo.getDateTime() + "\n"+  
-						"拍摄时标准时间: "+ photoInfo.getDateTimeStamp() + "\n"+  
-						"拍摄时地点经纬: "+ photoInfo.getLatitude() + "," +  photoInfo.getLongitude() + "\n"+  
-						"拍摄时地点海拔: "+ photoInfo.getAltitude() + "\n" +
-						"拍摄时使用设备: "+ photoInfo.getMake() + " (" +photoInfo.getModel() + ")\n"+
-						"******************************************************\n"
-					); 
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}else{
-			System.out.println("照片：" + filepath + " 不存在"); 
-		}
-	}
-
-	private static void copyPhoto(String sourceFolder,String targetFolder){
+	public static void copyPhoto(String sourceFolder,String targetFolder){
 		if(null != sourceFolder && sourceFolder.length() > 0){
 			sourceFolder = sourceFolder + "/";
 		}else{
@@ -186,7 +114,7 @@ public class getPhotoInfo {
 		int imgNum = 0;
 		if(sourceImg.exists()){
 			try {
-				PhotoInfo photoInfo = getPhotoInfoByPath(sourcePath,false);
+				PhotoInfo photoInfo = PhotoInfo.getPhotoInfoByPath(sourcePath,false);
 				if(photoInfo.getDateTime().length() > 0){
 					String targetBasePath = targetFolder + photoInfo.getDateTime();
 					targetBasePath = targetBasePath.replace(":","-").replace(" ","_");
@@ -235,55 +163,7 @@ public class getPhotoInfo {
 		return result;
 	}
 	
-	private static void printUsage(String page) {
-        try (BufferedReader in =
-                new BufferedReader(
-                        new InputStreamReader(
-                        		getPhotoInfo.class.getResourceAsStream(page),
-                                StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = in.readLine()) != null) {
-                System.out.println(line);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read " + page + " resource");
-        }
-    }
-    
-    private static PhotoInfo getPhotoInfoByPath(String imgFile, boolean showDetail) {
-    	PhotoInfo photoInfo = new PhotoInfo();
-        InputStream is = null;  
-        try {  
-            is = new FileInputStream(imgFile);  
-        } catch (FileNotFoundException e1) {  
-            e1.printStackTrace();  
-            return photoInfo;
-        }  
-        
-        try {  
-        	Metadata metadata = ImageMetadataReader.readMetadata(is);  
-            Iterable<Directory> iterable = metadata.getDirectories();  
-            for (Iterator<Directory> iter = iterable.iterator();iter.hasNext();) {  
-                Directory dr = iter.next();  
-                Collection<Tag> tags = dr.getTags();  
-                for (Tag tag : tags) {  
-                	if(PhotoInfo.keyList.contains(tag.getTagName())){
-                		photoInfo.valueList.put(tag.getTagName(), tag.getDescription());
-                	}
-                	if(showDetail){
-                		System.out.println(tag.getTagName() +":" + tag.getDescription());
-                	}
-                }  
-            }  
-        } catch (ImageProcessingException e) {  
-            e.printStackTrace();  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        }  
-        return photoInfo;
-    }
-   
-    private static String getFileMD5(File sourceFile) {
+	private static String getFileMD5(File sourceFile) {
         String ret = "";
         if (sourceFile.exists() && sourceFile.length() > 0) {
             BufferedInputStream is = null;
@@ -349,5 +229,5 @@ public class getPhotoInfo {
         	return "";
         }
     }
-}
 
+}

@@ -1,11 +1,23 @@
 package com.bihe0832.photo;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.Tag;
 
 public class PhotoInfo {
 	
@@ -15,8 +27,8 @@ public class PhotoInfo {
 	private static final String DATE_TIME = "Date/Time";
 	private static final String DATE_STAMP = "GPS Date Stamp";
 	private static final String TIME_STAMP = "GPS Time-Stamp";
-	private static final String WIDTH = "Image Width";
-	private static final String HEIGHT = "Image Height";
+	private static final String WIDTH = "Exif Image Width";
+	private static final String HEIGHT = "Exif Image Height";
 	private static final String LATITUDE_REF = "GPS Latitude Ref";
 	private static final String LATITUDE_VALUE = "GPS Latitude";
 	private static final String LONGTITUDE_REF = "GPS Longitude Ref";
@@ -25,11 +37,46 @@ public class PhotoInfo {
 	private static final String ALTITUDE_VALUE = "GPS Altitude";
 	private static final String EXIF_VERSION = "Exif Version";
 	
-	public HashMap<String, String> valueList = new HashMap<String, String>();
+	private HashMap<String, String> valueList = new HashMap<String, String>();
 	
-	public static final ArrayList<String> keyList = new ArrayList<String>(
+	private static final ArrayList<String> sKeyList = new ArrayList<String>(
 			Arrays.asList(DATE_TIME,MAKE, MODEL, DATE_TIME_ORIGINAL, DATE_STAMP, TIME_STAMP, WIDTH, HEIGHT, 
 					LATITUDE_REF, LONGTITUDE_REF, LATITUDE_VALUE, LONGTITUDE_VALUE,ALTITUDE_REF,ALTITUDE_VALUE,EXIF_VERSION));
+	
+	public static PhotoInfo getPhotoInfoByPath(String imgFile, boolean showDetail) {
+    	PhotoInfo photoInfo = new PhotoInfo();
+    	
+        InputStream is = null;  
+        try {  
+            is = new FileInputStream(imgFile);  
+        } catch (FileNotFoundException e1) {  
+            e1.printStackTrace();  
+            return photoInfo;
+        }  
+        
+        try {  
+        	Metadata metadata = ImageMetadataReader.readMetadata(is);  
+            Iterable<Directory> iterable = metadata.getDirectories();  
+            for (Iterator<Directory> iter = iterable.iterator();iter.hasNext();) {  
+                Directory dr = iter.next();  
+                Collection<Tag> tags = dr.getTags();  
+                for (Tag tag : tags) {  
+                	if(PhotoInfo.sKeyList.contains(tag.getTagName())){
+                		photoInfo.valueList.put(tag.getTagName(), tag.getDescription());
+                	}
+                	if(showDetail){
+                		System.out.println(tag.getTagName() +"(" + tag.getTagType() +"):" + tag.getDescription());
+                	}
+                }  
+            }  
+        } catch (ImageProcessingException e) {  
+            e.printStackTrace();  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }  
+        return photoInfo;
+    }
+   
 	
 	private String getValueByKey(String key) {
 		if(valueList.containsKey(key)){
@@ -48,7 +95,7 @@ public class PhotoInfo {
 	}
 	
 	public String getDateTime() {
-		String dateString = getFormatDateTime(getValueByKey( DATE_TIME_ORIGINAL));
+		String dateString = getFormatDateTime(getValueByKey(DATE_TIME_ORIGINAL));
 		if(dateString.length() < 1){
 			dateString = getFormatDateTime(getValueByKey( DATE_TIME));
 		}
