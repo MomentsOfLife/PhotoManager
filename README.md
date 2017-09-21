@@ -72,6 +72,40 @@ PhotoManager主要有以下功能：
 
 ## 使用事例
 
+### 构建Jar
+
+在根目录运行构建命令即可：
+
+
+	➜  PhotoManager git:(master) ✗ ./gradlew clean copyJar
+	Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=1g; support was removed in 8.0
+	Parallel execution with configuration on demand is an incubating feature.
+	Using the 'clean' task in combination with parallel execution may lead to unexpected runtime behavior.
+	:managephoto:clean
+	:app:clean
+	:clean
+	:managephoto:compileJava
+	注: /Volumes/Document/Document/github/PhotoManager/managephoto/src/main/java/mediautil/image/jpeg/BasicJpeg.java使用或覆盖了已过时的 API。
+	注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+	注: /Volumes/Document/Document/github/PhotoManager/managephoto/src/main/java/mediautil/image/jpeg/BasicJpeg.java使用了未经检查或不安全的操作。
+	注: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+	:managephoto:processResources
+	:managephoto:classes
+	:managephoto:jar
+	:managephoto:assemble
+	:managephoto:compileTestJava UP-TO-DATE
+	:managephoto:processTestResources UP-TO-DATE
+	:managephoto:testClasses UP-TO-DATE
+	:managephoto:test UP-TO-DATE
+	:managephoto:check UP-TO-DATE
+	:managephoto:build
+	:managephoto:copyJar
+	
+	BUILD SUCCESSFUL
+	
+	Total time: 1.838 secs
+	➜  PhotoManager git:(master) ✗
+
 ### 查看帮助
 
 	➜  PhotoManager git:(master) ✗ java -jar ./managePhoto.jar

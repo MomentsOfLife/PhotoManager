@@ -1,6 +1,5 @@
 apply plugin: 'java'
 
-sourceCompatibility = 1.7
 jar{
     //项目名，也是生成的jar的名字
     baseName = "managePhoto"
