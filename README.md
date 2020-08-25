@@ -66,9 +66,17 @@ PhotoManager主要有以下功能：
 	
 ## 相关文档
 
-- 基于命令行的照片整理及查看工具:
+- 照片整理系列之基于命令行的照片整理及查看工具:
 
 	[http://blog.bihe0832.com/photomanage.html](http://blog.bihe0832.com/photomanage.html)
+	
+- 照片整理系列之整理及归档的总体方案:
+
+	[https://blog.bihe0832.com/photos.html](https://blog.bihe0832.com/photos.html)
+	
+- 照片整理系列之单次整理流程:
+
+	[https://blog.bihe0832.com/photos-process.html](https://blog.bihe0832.com/photos-process.html)
 
 ## 使用事例
 
