@@ -1,12 +1,15 @@
 #!/bin/sh
 # author zixie
-#/bin/bash ~/zixie/github/Settings-Tools/tools/photo/optimize.sh /Volumes/Document/Documents/temp/2/3/201802
+#/bin/bash ~/zixie/github/PhotoManager/shell/optimize.sh /Volumes/Document/Documents/temp/2/3/201802
 
 function renamePhotos(){
 	echo "----------- process photo start -----------"
 	echo `pwd`"/ start to check:"
 	for photsName in *.jpg;do echo "process $photsName" && mv  $photsName `echo $photsName |  tr 'a-z' 'A-Z'`;done
-	for photsName in *.png;do echo "process $photsName" && mv $photsName `echo $photsName |  tr 'a-z' 'A-Z'`;done
+	for photsName in *.png;do echo "process $photsName" && mv  $photsName `echo $photsName |  tr 'a-z' 'A-Z'`;done
+	for photsName in *.mp4;do echo "process $photsName" && mv  $photsName `echo $photsName |  tr 'a-z' 'A-Z'`;done
+	for photsName in *.mov;do echo "process $photsName" && mv $photsName `echo $photsName |  tr 'a-z' 'A-Z'`;done
+	for photsName in *.m4v;do echo "process $photsName" && mv $photsName `echo $photsName |  tr 'a-z' 'A-Z'`;done
 	echo "----------- process photo end -----------"
 }
 export -f renamePhotos
