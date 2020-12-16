@@ -5,16 +5,19 @@ function renameVideo(){
 	echo "============ zixe check video start $photsName ======================"
 	photsName=$1
 	echo $photsName
-	sourceTime=`~/zixie/lib/ffprobe -v quiet -show_format ./$photsName | grep creation_time`
+	# sourceTime=`~/zixie/lib/ffprobe -v quiet -show_format ./$photsName | grep creation_time`
+	sourceTime=`~/zixie/lib/ffprobe -v quiet -show_format ./$photsName | grep date`
 	# echo $sourceTime
 	realTime=${sourceTime##*=}
 	# echo $realTime
-	realTimeWithoutExt=${realTime%%.*}
+	# realTimeWithoutExt=${realTime%%.*}
+	realTimeWithoutExt=${realTime%%+*}
 	# echo $realTimeWithoutExt
 	realTimeFormatTime=${realTimeWithoutExt//:/-} 
 	finalTime=${realTimeFormatTime//T/_} 
 	echo $finalTime
 	finalTimeWithExt=$finalTime.${photsName##*.}
+	# finalTimeWithExt=$finalTime.MOV
 	if [ "$finalTime"x != x ]; then
 		if [ -f $finalTimeWithExt ]; then
 			echo "$finalTimeWithExt from $photsName has exist"
@@ -37,6 +40,14 @@ do
 	renameVideo $photsName
 done
 for photsName in *.M4V;
+do 
+	renameVideo $photsName
+done
+for photsName in *.MPG;
+do 
+	renameVideo $photsName
+done
+for photsName in *.AVI;
 do 
 	renameVideo $photsName
 done

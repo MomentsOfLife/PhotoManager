@@ -1,15 +1,5 @@
 ## 简介
 
-### 背景
-
-最近在将各种云、各种设备上的照片统一在一起，结果发现遇到几个问题：
-
-1. 由于不停的来回拷贝过，导致部分照片重复了（不是相似，是完全相同）
-2. 由于拍摄来源不同，导致照片的名称很混乱，不方便浏览
-3. 由于拍摄来源不同，导致有可能是不同的照片但是文件名相同
-
-基于上面的原因，想把所有的照片整理一遍发现工程量巨大，尤其是当照片有60+G的时候。本来想网上找个工具，但是不太放心，因此最终自己写了一个简单的照片整理工具。
-
 ### 产品功能
 
 PhotoManager主要有以下功能：
@@ -30,16 +20,6 @@ PhotoManager主要有以下功能：
 
 3. 对于由于压缩、截图、保存等方式丢失照片的拍摄时间、地点等信息的照片，提供添加拍摄时间的方法。添加以后就可以继续用工具自动整理。
 
-### 待解决问题
-
-通过上面的问题，初步解决了照片整理的最麻烦的问题，但是还有几个问题没有解决
-
-1. 之前照片上云的时候，发现部分云盘私自压缩了照片，导致即使同一张照片，MD5并不相同，合并时都会被保留，目前无法区分
-
-2. 有时候会使用连拍等方式，导致会有很多很相似的照片，这部分照片其实可以选择后只保留个别几张
-
-这几个问题都只能通过一些其他算法来对比优化，由于怕出现误删因此没有深入实践，这几个个问题，本人的最终策略是在浏览照片的时候手动处理。
-
 ### 待添加功能
 
 1. 查看照片目前只能反映出经纬度，无法转换为地理位置，后续增加转换功能
@@ -48,11 +28,7 @@ PhotoManager主要有以下功能：
 
 ### 实现原理
 
-目前基本上所有拍摄的照片，都会基于Exif(可交换图像文件格式常被简称为Exif,Exchangeable image file format)格式，这种格式是专门为数码相机的照片设定的，可以记录数码照片的属性信息和拍摄数据。因此我们就通过java程序获取照片文件的Exif中保存的数据来进行照片归类和整理。具体的实现查看对应的代码。
-
-- github地址：
-
-	[https://github.com/bihe0832/PhotoManager](https://github.com/bihe0832/PhotoManager)
+目前基本上所有拍摄的照片，都会基于Exif(可交换图像文件格式常被简称为Exif,Exchangeable image file format)格式，这种格式是专门为数码相机的照片设定的，可以记录数码照片的属性信息和拍摄数据。因此我们就通过java程序获取照片文件的Exif中保存的数据来进行照片归类和整理。
 
 ### 兼容性问题
 
@@ -66,24 +42,27 @@ PhotoManager主要有以下功能：
 	
 ## 相关文档
 
-- 照片整理系列之基于命令行的照片整理及查看工具:
+- 照片整理系列之整理及归档的总体方案： 
 
-	[http://blog.bihe0832.com/photomanage.html](http://blog.bihe0832.com/photomanage.html)
-	
-- 照片整理系列之整理及归档的总体方案:
+	[https://blog.bihe0832.com/photos.html](https://blog.bihe0832.com/photos.html) 
 
-	[https://blog.bihe0832.com/photos.html](https://blog.bihe0832.com/photos.html)
-	
-- 照片整理系列之单次整理流程:
+- 照片整理系列之单次整理流程： 
 
-	[https://blog.bihe0832.com/photos-process.html](https://blog.bihe0832.com/photos-process.html)
+	[https://blog.bihe0832.com/photos-process.html](https://blog.bihe0832.com/photos-process.html) 
+
+- 照片整理系列之基于命令行的照片整理及查看工具： 
+
+	[https://blog.bihe0832.com/photomanage.html](https://blog.bihe0832.com/photomanage.html) 
+
+- 照片整理系之视频归档整理方案：
+
+	[https://blog.bihe0832.com/video-process.html](https://blog.bihe0832.com/video-process.html)
 
 ## 使用事例
 
 ### 构建Jar
 
 在根目录运行构建命令即可：
-
 
 	➜  PhotoManager git:(master) ✗ ./gradlew clean copyJar
 	Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=1g; support was removed in 8.0

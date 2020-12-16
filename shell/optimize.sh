@@ -10,6 +10,8 @@ function renamePhotos(){
 	for photsName in *.mp4;do echo "process $photsName" && mv  $photsName `echo $photsName |  tr 'a-z' 'A-Z'`;done
 	for photsName in *.mov;do echo "process $photsName" && mv $photsName `echo $photsName |  tr 'a-z' 'A-Z'`;done
 	for photsName in *.m4v;do echo "process $photsName" && mv $photsName `echo $photsName |  tr 'a-z' 'A-Z'`;done
+	for photsName in *.mpg;do echo "process $photsName" && mv $photsName `echo $photsName |  tr 'a-z' 'A-Z'`;done
+	for photsName in *.avi;do echo "process $photsName" && mv $photsName `echo $photsName |  tr 'a-z' 'A-Z'`;done
 	echo "----------- process photo end -----------"
 }
 export -f renamePhotos
