@@ -38,24 +38,6 @@ PhotoManager主要有以下功能：
 
 	目前代码中仅对这两种时间格式做了兼容。
 	
-## 相关文档
-
-- 照片整理系列之整理及归档的总体方案： 
-
-	[https://blog.bihe0832.com/photos.html](https://blog.bihe0832.com/photos.html) 
-
-- 照片整理系列之单次整理流程： 
-
-	[https://blog.bihe0832.com/photos-process.html](https://blog.bihe0832.com/photos-process.html) 
-
-- 照片整理系列之基于命令行的照片整理及查看工具： 
-
-	[https://blog.bihe0832.com/photomanage.html](https://blog.bihe0832.com/photomanage.html) 
-
-- 照片整理系之视频归档整理方案：
-
-	[https://blog.bihe0832.com/video-process.html](https://blog.bihe0832.com/video-process.html)
-
 ## 使用事例
 
 ### 构建Jar
